@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pabrik Logika Kata Benda - Kelas 2 MIN</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: #e0e7ff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .logic-board {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .target-box {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #334155;
+        }
+
+        .rule-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 10px;
+            font-size: 0.9rem;
+            color: #92400e;
+            text-align: left;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn-option {
+            background-color: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .btn-option:hover {
+            border-color: var(--primary);
+            background-color: #f5f3ff;
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-height: 30px;
+        }
+
+        .feedback.correct {
+            color: var(--success);
+        }
+
+        .feedback.incorrect {
+            color: var(--error);
+        }
+
+        .btn-next {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            display: none;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .btn-next:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .creator-tag {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="header">
+            <h1>Pabrik Logika Kata Benda</h1>
+            <p>Bahasa Indonesia - Kelas 2 MIN (Pendekatan Computer Logic)</p>
+        </div>
+
+        <div id="game-play-area">
+            <div class="stats-bar">
+                <span id="level-indicator">Soal: 1 / 5</span>
+                <span id="score-indicator">Skor: 0</span>
+            </div>
+
+            <div class="logic-board">
+                <div class="rule-box" id="rule-text">
+                    <strong>Aturan Sistem:</strong> Menyeleksi objek berdasarkan ciri-cirinya.
+                </div>
+                <div class="target-box" id="question-text">
+                    Memuat pertanyaan...
+                </div>
+                
+                <div class="options-grid" id="options-container">
+                    <!-- Opsi tombol dimuat via JS -->
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback-message"></div>
+            <button class="btn-next" id="next-btn" onclick="nextQuestion()">Lanjut ke Logika Berikutnya</button>
+        </div>
+
+        <div id="game-over-area" style="display: none;">
+            <h2>🎉 Analisis Selesai!</h2>
+            <p id="final-score-text" style="font-size: 1.2rem; margin: 20px 0;"></p>
+            <button class="btn-next" style="display: block;" onclick="restartGame()">Mainkan Lagi</button>
+        </div>
+
+        <div class="creator-tag">
+            Creator: ROSTINAWATI | Genre: Computer Logic
+        </div>
+    </div>
+
+    <script>
+        // Data Pertanyaan Logika Kata Benda & Ciri-cirinya untuk Kelas 2 MIN
+        const questions = [
+            {
+                rule: "IF benda == 'terbuat dari kaca' AND 'biasanya dipakai di wajah untuk membantu melihat' THEN pilih objek yang sesuai.",
+                question: "Manakah benda yang memiliki ciri-ciri tersebut?",
+                options: [
+                    { text: "Kacamata", correct: true },
+                    { text: "Topi", correct: false },
+                    { text: "Sepatu", correct: false },
+                    { text: "Kaos kaki", correct: false }
+                ]
+            },
+            {
+                rule: "IF benda == 'berbentuk panjang/silinder' AND 'berfungsi sebagai alat untuk menulis di buku' THEN pilih objek yang sesuai.",
+                question: "Manakah kata benda yang dimaksud?",
+                options: [
+                    { text: "Bantal", correct: false },
+                    { text: "Pensil", correct: true },
+                    { text: "Guling", correct: false },
+                    { text: "Sendok", correct: false }
+                ]
+            },
+            {
+                rule: "IF benda == 'benda hidup/hewan' AND 'memiliki 4 kaki dan mengeong' THEN evaluasi kondisi ciri-ciri benda.",
+                question: "Hewan manakah yang sesuai dengan logika ciri-ciri di atas?",
+                options: [
+                    { text: "Bebek", correct: false },
+                    { text: "Kucing", correct: true },
+                    { text: "Ikan", correct: false },
+                    { text: "Burung", correct: false }
+                ]
+            },
+            {
+                rule: "IF benda == 'terbuat dari kain' AND 'dikenakan di kepala untuk melindungi dari panas' THEN tentukan bendanya.",
+                question: "Ciri-ciri tersebut merujuk pada benda...",
+                options: [
+                    { text: "Selimut", correct: false },
+                    { text: "Celana", correct: false },
+                    { text: "Topi", correct: true },
+                    { text: "Tas", correct: false }
+                ]
+            },
+            {
+                rule: "IF benda == 'terbuat dari plastik/besi' AND 'digunakan untuk menyendok makanan cair/bubur' THEN pilih objek yang tepat.",
+                question: "Apakah nama benda dengan ciri tersebut?",
+                options: [
+                    { text: "Garpu", correct: false },
+                    { text: "Sendok", correct: true },
+                    { text: "Pisau", correct: false },
+                    { text: "Piring", correct: false }
+                ]
+            }
+        ];
+
+        let currentLevel = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        function loadQuestion() {
+            isAnswered = false;
+            const q = questions[currentLevel];
+            
+            document.getElementById("level-indicator").innerText = `Soal: ${currentLevel + 1} / ${questions.length}`;
+            document.getElementById("score-indicator").innerText = `Skor: ${score}`;
+            document.getElementById("rule-text").innerHTML = `<strong>Aturan Sistem (Logic):</strong> ${q.rule}`;
+            document.getElementById("question-text").innerText = q.question;
+            
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+            
+            // Acak urutan opsi tombol agar interaktif
+            let shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement("button");
+                btn.className = "btn-option";
+                btn.innerText = opt.text;
+                btn.onclick = () => checkAnswer(opt.correct, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById("feedback-message").innerText = "";
+            document.getElementById("feedback-message").className = "feedback";
+            document.getElementById("next-btn").style.display = "none";
+        }
+
+        function checkAnswer(isCorrect, buttonElement) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const allButtons = document.querySelectorAll(".btn-option");
+            allButtons.forEach(btn => btn.disabled = true);
+
+            const feedbackEl = document.getElementById("feedback-message");
+
+            if (isCorrect) {
+                score += 20;
+                buttonElement.style.backgroundColor = "#d1fae5";
+                buttonElement.style.borderColor = "var(--success)";
+                feedbackEl.innerText = "✨ Benar! Logika pemetaan ciri benda tepat!";
+                feedbackEl.className = "feedback correct";
+            } else {
+                buttonElement.style.backgroundColor = "#fee2e2";
+                buttonElement.style.borderColor = "var(--error)";
+                feedbackEl.innerText = "❌ Kurang tepat. Coba perhatikan kembali ciri-cirinya.";
+                feedbackEl.className = "feedback incorrect";
+                
+                // Tampilkan jawaban yang benar
+                allButtons.forEach(btn => {
+                    const originalOpt = questions[currentLevel].options.find(o => o.text === btn.innerText);
+                    if (originalOpt && originalOpt.correct) {
+                        btn.style.backgroundColor = "#d1fae5";
+                        btn.style.borderColor = "var(--success)";
+                    }
+                });
+            }
+
+            document.getElementById("score-indicator").innerText = `Skor: ${score}`;
+
+            if (currentLevel < questions.length - 1) {
+                document.getElementById("next-btn").style.display = "block";
+            } else {
+                setTimeout(showGameOver, 1500);
+            }
+        }
+
+        function nextQuestion() {
+            currentLevel++;
+            loadQuestion();
+        }
+
+        function showGameOver() {
+            document.getElementById("game-play-area").style.display = "none";
+            document.getElementById("game-over-area").style.display = "block";
+            document.getElementById("final-score-text").innerText = `Skor Akhir Kamu: ${score} dari 100`;
+        }
+
+        function restartGame() {
+            currentLevel = 0;
+            score = 0;
+            document.getElementById("game-play-area").style.display = "block";
+            document.getElementById("game-over-area").style.display = "none";
+            loadQuestion();
+        }
+
+        // Inisialisasi game saat pertama kali dibuka
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
